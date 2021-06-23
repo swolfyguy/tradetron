@@ -18,9 +18,9 @@ def get_value_byaction(action: str, value: int = 1):
 
 
 @app.post("/trade_tron")
-def read_item(stock_name: str, action: str, value: int,
+def post_tradetron(stock_name: str, action: str, value: int,
               baseurl: str = "https://api.tradetron.tech/api1.php",
-              auth_key: str = "173a11bf-f3be-47a8-8487-899f9269be50",
+              auth_key: str = "",
               ):
     data = {
         "auth-token": auth_key,
