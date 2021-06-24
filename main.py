@@ -1,7 +1,8 @@
 from typing import Optional
 import requests
 from fastapi import FastAPI
-
+from pydantic import BaseModel
+import json
 app = FastAPI()
 
 
@@ -17,16 +18,24 @@ def get_value_byaction(action: str, value: int = 1):
         return int(-abs(value))
 
 
-@app.post("/trade_tron")
-def post_tradetron(stock_name: str, action: str, value: int,
-              baseurl: str = "https://api.tradetron.tech/api1.php",
-              auth_key: str = "",
-              ):
-    data = {
-        "auth-token": auth_key,
-        "key": stock_name,
-        "value": get_value_byaction(action.lower(), value)
-    }
+class stock_body(BaseModel):
+    stock_name: str
+    action: str
+    value: int
+    baseurl: str
+    auth_key: str
 
-    x = requests.request(method='POST', url=baseurl, data=data)
-    return {"response": x.text, "tradetron_request": {"url": baseurl, "data": data}}
+
+@app.post("/trade_tron")
+def post_tradetron(stock_body: stock_body
+                   ):
+    data = {
+        "auth-token": stock_body.auth_key,
+        "key": stock_body.stock_name,
+        "value": get_value_byaction(stock_body.action.lower(), stock_body.value)
+    }
+    try:
+        x = requests.request(method='POST', url=stock_body.baseurl, data=data)
+    except Exception as e:
+        return str(e)
+    return {"response": x.text, "tradetron_request": {"url": stock_body.baseurl, "data": data}}
